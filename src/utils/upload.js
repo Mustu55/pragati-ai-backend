@@ -2,18 +2,8 @@ const multer = require('multer');
 const path = require('path');
 const crypto = require('crypto');
 
-// Configure storage
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    // Note: ensure the "uploads" directory exists relative to project root
-    cb(null, path.join(__dirname, '../../../uploads'));
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = crypto.randomBytes(8).toString('hex');
-    const ext = path.extname(file.originalname);
-    cb(null, file.fieldname + '-' + Date.now() + '-' + uniqueSuffix + ext);
-  }
-});
+// Use memory storage for serverless (Vercel has read-only filesystem)
+const storage = multer.memoryStorage();
 
 // File filter (optional: limit types)
 const fileFilter = (req, file, cb) => {
