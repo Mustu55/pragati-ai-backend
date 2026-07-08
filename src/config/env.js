@@ -15,7 +15,8 @@ const _env = envSchema.safeParse(process.env);
 
 if (!_env.success) {
   console.error('❌ Invalid environment variables:', _env.error.format());
-  throw new Error('Invalid environment variables');
+  // Export raw env so server can at least boot and return API errors
+  module.exports = process.env;
+} else {
+  module.exports = _env.data;
 }
-
-module.exports = _env.data;
