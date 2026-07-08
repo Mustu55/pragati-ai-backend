@@ -12,12 +12,15 @@ const app = express();
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' }
 }));
-app.use(cors({
-  origin: true, // Allows dynamic origins to work seamlessly with frontend deployments
+const corsOptions = {
+  origin: true, 
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // Explicitly handle preflight OPTIONS requests
 
 // Rate limiting
 const limiter = rateLimit({
