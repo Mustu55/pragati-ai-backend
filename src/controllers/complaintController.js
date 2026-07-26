@@ -2,12 +2,15 @@ const Complaint = require('../models/complaintModel');
 const Issue = require('../models/issueModel');
 const aiService = require('../services/aiService');
 const logger = require('../utils/logger');
+const { ensureDbConnection } = require('../config/db');
 
 // @desc    Create new complaint
 // @route   POST /api/complaints
 // @access  Private (Citizen)
 exports.createComplaint = async (req, res) => {
   try {
+    await ensureDbConnection();
+
     const { title, description, location, category } = req.body;
 
     // Validate required fields
@@ -91,6 +94,8 @@ exports.createComplaint = async (req, res) => {
 // @access  Private (Citizen)
 exports.getMyComplaints = async (req, res) => {
   try {
+    await ensureDbConnection();
+
     const complaints = await Complaint.find({ user: req.user.id }).sort('-createdAt');
     res.status(200).json({
       success: true,
@@ -107,6 +112,8 @@ exports.getMyComplaints = async (req, res) => {
 // @access  Private (Officer/Admin)
 exports.getComplaints = async (req, res) => {
   try {
+    await ensureDbConnection();
+
     const complaints = await Complaint.find().populate('user', 'name email').sort('-createdAt');
     res.status(200).json({
       success: true,

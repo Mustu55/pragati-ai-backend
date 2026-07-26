@@ -2,6 +2,7 @@ const Issue = require('../models/issueModel');
 const Complaint = require('../models/complaintModel');
 const logger = require('../utils/logger');
 const aiService = require('../services/aiService'); // We will add clustering logic to this later if needed
+const { ensureDbConnection } = require('../config/db');
 
 const ISSUE_STATUS_TO_COMPLAINT_STATUS = {
   Open: 'Pending',
@@ -20,6 +21,8 @@ const normalizeIssueStatus = (status) => {
 // @access  Private (Admin/Officer)
 exports.getIssues = async (req, res) => {
   try {
+    await ensureDbConnection();
+
     const issues = await Issue.find({
       linkedComplaints: { $exists: true, $not: { $size: 0 } }
     })
@@ -33,7 +36,7 @@ exports.getIssues = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Get Issues Error: ${error.message}`);
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ success: false, message: error.message || 'Server error' });
   }
 };
 
@@ -42,6 +45,8 @@ exports.getIssues = async (req, res) => {
 // @access  Private (Admin/Officer)
 exports.getIssue = async (req, res) => {
   try {
+    await ensureDbConnection();
+
     const issue = await Issue.findById(req.params.id)
       .populate('linkedComplaints')
       .populate('assignedTo', 'name email');
@@ -64,6 +69,8 @@ exports.getIssue = async (req, res) => {
 // @access  Private (Admin/Officer)
 exports.updateIssue = async (req, res) => {
   try {
+    await ensureDbConnection();
+
     const { status, assignedTo } = req.body;
     const normalizedStatus = normalizeIssueStatus(status);
     const update = {};

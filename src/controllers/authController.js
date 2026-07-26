@@ -2,6 +2,7 @@ const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
 const env = require('../config/env');
 const logger = require('../utils/logger');
+const { ensureDbConnection } = require('../config/db');
 
 // Generate JWT
 const generateToken = (id, role) => {
@@ -15,6 +16,8 @@ const generateToken = (id, role) => {
 // @access  Public
 exports.register = async (req, res) => {
   try {
+    await ensureDbConnection();
+
     const { name, email, password, role, department, employeeId } = req.body;
 
     // Check if user exists
@@ -51,7 +54,7 @@ exports.register = async (req, res) => {
     }
   } catch (error) {
     logger.error(`Register Error: ${error.message}`);
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ success: false, message: error.message || 'Server error' });
   }
 };
 
@@ -60,6 +63,8 @@ exports.register = async (req, res) => {
 // @access  Public
 exports.login = async (req, res) => {
   try {
+    await ensureDbConnection();
+
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -92,7 +97,7 @@ exports.login = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Login Error: ${error.message}`);
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ success: false, message: error.message || 'Server error' });
   }
 };
 
@@ -101,6 +106,8 @@ exports.login = async (req, res) => {
 // @access  Private
 exports.getMe = async (req, res) => {
   try {
+    await ensureDbConnection();
+
     // req.user is set in authMiddleware
     const user = await User.findById(req.user.id);
     res.status(200).json({
@@ -109,7 +116,7 @@ exports.getMe = async (req, res) => {
     });
   } catch (error) {
     logger.error(`GetMe Error: ${error.message}`);
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ success: false, message: error.message || 'Server error' });
   }
 };
 
@@ -118,6 +125,8 @@ exports.getMe = async (req, res) => {
 // @access  Private
 exports.updateProfile = async (req, res) => {
   try {
+    await ensureDbConnection();
+
     const { name, department } = req.body;
     
     // Find user
@@ -139,6 +148,6 @@ exports.updateProfile = async (req, res) => {
     });
   } catch (error) {
     logger.error(`UpdateProfile Error: ${error.message}`);
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ success: false, message: error.message || 'Server error' });
   }
 };

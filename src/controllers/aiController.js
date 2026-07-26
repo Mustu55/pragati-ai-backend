@@ -2,12 +2,15 @@ const aiService = require('../services/aiService');
 const Issue = require('../models/issueModel');
 const Complaint = require('../models/complaintModel');
 const logger = require('../utils/logger');
+const { ensureDbConnection } = require('../config/db');
 
 // @desc    Get AI Chatbot response
 // @route   POST /api/ai/chat
 // @access  Private (Citizen)
 exports.chat = async (req, res) => {
   try {
+    await ensureDbConnection();
+
     const { message } = req.body;
 
     if (!message || !message.trim()) {
@@ -34,7 +37,7 @@ exports.chat = async (req, res) => {
     });
   } catch (error) {
     logger.error(`AI Chat Error: ${error.message}`);
-    res.status(500).json({ success: false, message: 'Failed to get AI response' });
+    res.status(500).json({ success: false, message: error.message || 'Failed to get AI response' });
   }
 };
 
@@ -43,6 +46,8 @@ exports.chat = async (req, res) => {
 // @access  Private (Admin/Officer)
 exports.getGovernanceBrief = async (req, res) => {
   try {
+    await ensureDbConnection();
+
     if (!process.env.GEMINI_API_KEY) {
       return res.status(200).json({ success: true, data: { brief: "Gemini API key missing. Unable to generate brief." }});
     }
@@ -61,6 +66,6 @@ exports.getGovernanceBrief = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Governance Brief Error: ${error.message}`);
-    res.status(500).json({ success: false, message: 'Failed to generate brief' });
+    res.status(500).json({ success: false, message: error.message || 'Failed to generate brief' });
   }
 };

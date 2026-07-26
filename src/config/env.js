@@ -6,8 +6,8 @@ dotenv.config();
 const envSchema = z.object({
   PORT: z.string().default('5000'),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  MONGO_URI: z.string(),
-  JWT_SECRET: z.string(),
+  MONGO_URI: z.string().optional(),
+  JWT_SECRET: z.string().default('pragati-ai-dev-secret'),
   GEMINI_API_KEY: z.string().optional(), // Make optional so app doesn't crash immediately without it
 });
 

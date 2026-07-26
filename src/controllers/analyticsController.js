@@ -1,12 +1,15 @@
 const Complaint = require('../models/complaintModel');
 const Issue = require('../models/issueModel');
 const logger = require('../utils/logger');
+const { ensureDbConnection } = require('../config/db');
 
 // @desc    Get dashboard analytics
 // @route   GET /api/analytics
 // @access  Private (Admin/Officer)
 exports.getAnalytics = async (req, res) => {
   try {
+    await ensureDbConnection();
+
     const totalComplaints = await Complaint.countDocuments();
     const resolvedComplaints = await Complaint.countDocuments({ status: 'Resolved' });
     const pendingComplaints = totalComplaints - resolvedComplaints;
@@ -42,6 +45,6 @@ exports.getAnalytics = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Get Analytics Error: ${error.message}`);
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ success: false, message: error.message || 'Server error' });
   }
 };
