@@ -18,10 +18,7 @@ exports.createComplaint = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Description and location are required' });
     }
 
-    let mediaUrl = null;
-    if (req.file) {
-      mediaUrl = `/uploads/${req.file.filename}`;
-    }
+    const mediaUrl = null; // Vercel serverless: no persistent file storage
 
     // 1. AI Analysis
     let aiData = {
@@ -36,8 +33,8 @@ exports.createComplaint = async (req, res) => {
          aiData = await aiService.classifyComplaint(description);
          aiData.category = category || aiData.category; // prefer user-selected category
          
-         if (req.file) {
-             const imageAnalysis = await aiService.analyzeImage(req.file.path);
+         if (req.file && req.file.buffer) {
+             const imageAnalysis = await aiService.analyzeImage(req.file.buffer, req.file.mimetype);
              if (imageAnalysis && imageAnalysis.severity === 'Critical') aiData.urgency = 'Critical';
          }
       }

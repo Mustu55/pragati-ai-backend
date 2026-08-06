@@ -1,7 +1,5 @@
 const { getModel, DEFAULT_CHAT_MODEL } = require('../config/gemini');
-
 const logger = require('../utils/logger');
-const fs = require('fs');
 
 // Current model names (as of 2025)
 const FLASH_MODEL = 'gemini-2.0-flash';
@@ -150,16 +148,15 @@ class AIService {
     }
   }
 
-  // 3. Image Analysis
-  async analyzeImage(imagePath) {
+  // 3. Image Analysis — accepts a Buffer (from multer memoryStorage)
+  async analyzeImage(imageBuffer, mimeType = 'image/jpeg') {
     try {
       const model = getModel(FLASH_MODEL);
 
-      const imageBytes = fs.readFileSync(imagePath);
       const imagePart = {
         inlineData: {
-          data: imageBytes.toString("base64"),
-          mimeType: "image/jpeg"
+          data: imageBuffer.toString('base64'),
+          mimeType
         }
       };
 
