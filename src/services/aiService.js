@@ -201,17 +201,14 @@ class AIService {
     }
   }
 
-  // 5. Chatbot
-  async chat(message, context = {}) {
+  // 5. Chatbot — supports multi-turn conversations
+  async chat(message, history = [], context = {}) {
     try {
       if (!process.env.GEMINI_API_KEY) {
         return getFallbackChatReply(message, context);
       }
 
-      const model = getModel(process.env.GEMINI_CHAT_MODEL || DEFAULT_CHAT_MODEL);
-
-
-      const prompt = `You are Pragati AI, a highly intelligent, empathetic, and knowledgeable civic governance assistant.
+      const systemInstruction = `You are Pragati AI, a highly intelligent, empathetic, and knowledgeable civic governance assistant.
 
 Your goal is to help citizens report civic issues, track their complaints, and understand government schemes. 
 You must follow these rules when responding:
@@ -224,11 +221,21 @@ Use this platform knowledge when relevant:
 ${PLATFORM_KNOWLEDGE}
 
 User's recent complaint context:
-${formatComplaintContext(context.complaints || [])}
+${formatComplaintContext(context.complaints || [])}`;
 
-Citizen's message: "${message}"`;
+      const model = getModel(process.env.GEMINI_CHAT_MODEL || DEFAULT_CHAT_MODEL, systemInstruction);
 
-      const result = await model.generateContent(prompt);
+      // Convert frontend history representation into Gemini format
+      const geminiHistory = (history || []).slice(-12).map(msg => ({
+        role: msg.sender === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.text }]
+      }));
+
+      const chat = model.startChat({
+        history: geminiHistory
+      });
+
+      const result = await chat.sendMessage(message);
       return result.response.text();
     } catch (error) {
       logger.warn(`AI Chat fallback used: ${error.message}`);

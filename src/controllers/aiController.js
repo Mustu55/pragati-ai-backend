@@ -11,7 +11,7 @@ exports.chat = async (req, res) => {
   try {
     await ensureDbConnection();
 
-    const { message } = req.body;
+    const { message, history } = req.body;
 
     if (!message || !message.trim()) {
       return res.status(400).json({ success: false, message: 'Message is required' });
@@ -22,7 +22,7 @@ exports.chat = async (req, res) => {
       .limit(5)
       .select('text category status location createdAt');
 
-    const reply = await aiService.chat(message, {
+    const reply = await aiService.chat(message, history || [], {
       user: {
         id: req.user.id,
         name: req.user.name,

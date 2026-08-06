@@ -11,11 +11,14 @@ if (env.GEMINI_API_KEY) {
 }
 
 // Get models
-const getModel = (modelName) => {
+const getModel = (modelName, systemInstruction) => {
   if (!genAI) throw new Error('Gemini API is not configured');
-  // Fallback for safety: use a known-good default.
   const resolvedName = modelName || 'gemini-1.5-flash';
-  return genAI.getGenerativeModel({ model: resolvedName });
+  const config = { model: resolvedName };
+  if (systemInstruction) {
+    config.systemInstruction = systemInstruction;
+  }
+  return genAI.getGenerativeModel(config);
 };
 
 // Keep a single source of truth for chat model.
