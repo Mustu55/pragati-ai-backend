@@ -36,22 +36,18 @@ exports.register = async (req, res) => {
       employeeId
     });
 
-    if (user) {
-      const token = generateToken(user._id, user.role);
-      res.status(201).json({
-        success: true,
-        token,
-        data: {
-          _id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          department: user.department,
-        }
-      });
-    } else {
-      res.status(400).json({ success: false, message: 'Invalid user data' });
-    }
+    const token = generateToken(user._id, user.role);
+    res.status(201).json({
+      success: true,
+      token,
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        department: user.department,
+      }
+    });
   } catch (error) {
     logger.error(`Register Error: ${error.message}`);
     res.status(500).json({ success: false, message: error.message || 'Server error' });

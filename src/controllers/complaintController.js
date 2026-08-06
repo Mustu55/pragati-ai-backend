@@ -58,11 +58,8 @@ exports.createComplaint = async (req, res) => {
     });
 
     // 3. Create Issue to group this complaint (simplistic 1:1 mapping for now)
-    let priority = 'Medium';
-    let impactScore = 50;
-    if (aiData.urgency === 'Critical') { priority = 'Critical'; impactScore = 90; }
-    else if (aiData.urgency === 'High') { priority = 'High'; impactScore = 75; }
-    else if (aiData.urgency === 'Low') { priority = 'Low'; impactScore = 20; }
+    const urgencyMap = { Critical: { p: 'Critical', s: 90 }, High: { p: 'High', s: 75 }, Low: { p: 'Low', s: 20 }, Medium: { p: 'Medium', s: 50 } };
+    const { p: priority, s: impactScore } = urgencyMap[aiData.urgency] || urgencyMap.Medium;
 
     const issue = await Issue.create({
       title: title || `${aiData.category} Issue at ${location}`,
